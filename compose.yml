@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8000:80
+    volumes:
+      - type: bind
+        source: ./src
+        target: /var/www/app
+      - type: volume
+        source: vendor
+        target: /var/www/app/vendor
+    command: sh -c 'chmod -R 777 . && composer install && apache2-foreground'
+  vite-compiler:
+    image: node:lts
+    working_dir: /var/www/app
+    volumes:
+      - type: bind
+        source: ./src
+        target: /var/www/app
+      - type: volume
+        source: node_modules
+        target: /var/www/app/node_modules
+    command: sh -c 'npm install && npm run dev -- --host'
+    ports:
+      - 5173:5173
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes:
+  vendor:
+  node_modules:
